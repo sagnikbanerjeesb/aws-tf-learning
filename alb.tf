@@ -1,3 +1,4 @@
+// ALB
 resource "aws_lb" "public-alb" {
   name               = "public-alb"
   internal           = false
@@ -8,6 +9,7 @@ resource "aws_lb" "public-alb" {
   enable_deletion_protection = false
 }
 
+// ECS service will connect to this target group to register itself as a potential route
 resource "aws_lb_target_group" "dobby" {
   name     = "dobby"
   port     = 4444

@@ -1,3 +1,4 @@
+// IAM role required by the docker daemon, etc to fire up the container
 resource "aws_iam_role" "ecs-task-execution-role" {
   name = "ecs-task-execution-role"
 
@@ -18,16 +19,19 @@ resource "aws_iam_role" "ecs-task-execution-role" {
   })
 }
 
+// attaching existing policy to the role
 resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attachment" {
   role       = aws_iam_role.ecs-task-execution-role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+// the ecs cluster
 resource "aws_ecs_cluster" "ecs-cluster" {
   name               = "ecs-cluster"
   capacity_providers = ["FARGATE"]
 }
 
+// One task to be deployed in ecs. Most important content: the container description
 resource "aws_ecs_task_definition" "dobby" {
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
@@ -50,6 +54,7 @@ resource "aws_ecs_task_definition" "dobby" {
   ])
 }
 
+// ECS Service to be deployed on the private subnet using the task definition defined above. It will be connected to the ALB target group.
 resource "aws_ecs_service" "dobby" {
   name            = "dobby"
   cluster         = aws_ecs_cluster.ecs-cluster.id
